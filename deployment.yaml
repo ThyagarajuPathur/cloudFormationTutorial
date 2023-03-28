@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'cloud formation demo'
+Parameters:
+  Environment:
+    Description: Environment Name
+    Type: String
+
+Resources:
+  lambdaFunctioniamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: 'youtube-demo-lambda-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+
+  lambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: 'CloudFormaiton Demo Lambda'
+      FunctionName: !Sub youtube-demo-cloudformation${Environment}
+      Handler: 'cloudFormationTutorial::cloudFormationTutorial.Function::FunctionHandler'
+      MemorySize: 128
+      Role: !GetAtt lambdaFunctioniamRole.Arn
+      Runtime: dotnet6
+      Environment:
+        Variables:
+          key1: value1 # A map of key-value pairs that the Lambda function can access
+      Code:
+        S3Bucket: tyagarajup-youtube-demo-cloudformation-packages
+        S3Key: lambda.zip
+      Tags:
+        - Key: keyname
+          Value: value
